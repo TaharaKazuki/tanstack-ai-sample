@@ -2,34 +2,10 @@
 
 import { useState } from 'react'
 import { fetchServerSentEvents, useChat } from '@tanstack/ai-react'
-
-// 簡易Markdownレンダリング関数
-function renderMarkdown(text: string) {
-  let html = text
-
-  // コードブロック（```）
-  html = html.replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-100 p-3 rounded-lg overflow-x-auto my-2"><code>$1</code></pre>')
-
-  // インラインコード（`）
-  html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-2 py-1 rounded text-sm">$1</code>')
-
-  // 太字（**）
-  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>')
-
-  // 斜体（*）
-  html = html.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>')
-
-  // リンク
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
-
-  // リスト（-）
-  html = html.replace(/^- (.+)$/gm, '<li class="ml-4">• $1</li>')
-
-  // 改行
-  html = html.replace(/\n/g, '<br />')
-
-  return html
-}
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
+import 'highlight.js/styles/github.css'
 
 export function Chat() {
   const [input, setInput] = useState('')
@@ -47,7 +23,7 @@ export function Chat() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="flex flex-col h-full">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.length === 0 && (
@@ -71,8 +47,8 @@ export function Chat() {
             {/* Avatar */}
             <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
               message.role === 'assistant'
-                ? 'bg-gradient-to-br from-blue-500 to-blue-700 text-white'
-                : 'bg-gradient-to-br from-gray-400 to-gray-600 text-white'
+                ? 'bg-linear-to-br from-blue-500 to-blue-700 text-white'
+                : 'bg-linear-to-br from-gray-400 to-gray-600 text-white'
             }`}>
               {message.role === 'assistant' ? (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,11 +83,108 @@ export function Chat() {
                   }
                   if (part.type === 'text') {
                     return (
-                      <div
-                        key={idx}
-                        className="prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ __html: renderMarkdown(part.content) }}
-                      />
+                      <div key={idx} className="prose prose-sm max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeHighlight]}
+                          components={{
+                          // カスタムスタイリング
+                          strong: ({ node, children, ...props }: any) => (
+                            <strong className="font-bold" {...props}>
+                              {children}
+                            </strong>
+                          ),
+                          em: ({ node, children, ...props }: any) => (
+                            <em className="italic" {...props}>
+                              {children}
+                            </em>
+                          ),
+                          code: ({ node, inline, className, children, ...props }: any) => {
+                            return inline ? (
+                              <code className="bg-gray-100 px-2 py-1 rounded text-sm" {...props}>
+                                {children}
+                              </code>
+                            ) : (
+                              <code className={className} {...props}>
+                                {children}
+                              </code>
+                            )
+                          },
+                          pre: ({ node, children, ...props }: any) => (
+                            <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto my-2" {...props}>
+                              {children}
+                            </pre>
+                          ),
+                          a: ({ node, children, ...props }: any) => (
+                            <a
+                              className="text-blue-600 hover:underline"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              {...props}
+                            >
+                              {children}
+                            </a>
+                          ),
+                          ul: ({ node, children, ...props }: any) => (
+                            <ul className="list-disc ml-4 my-2" {...props}>
+                              {children}
+                            </ul>
+                          ),
+                          ol: ({ node, children, ...props }: any) => (
+                            <ol className="list-decimal ml-4 my-2" {...props}>
+                              {children}
+                            </ol>
+                          ),
+                          li: ({ node, children, ...props }: any) => (
+                            <li className="ml-2" {...props}>
+                              {children}
+                            </li>
+                          ),
+                          p: ({ node, children, ...props }: any) => (
+                            <p className="mb-2 last:mb-0" {...props}>
+                              {children}
+                            </p>
+                          ),
+                          h1: ({ node, children, ...props }: any) => (
+                            <h1 className="text-2xl font-bold mb-2 mt-4" {...props}>
+                              {children}
+                            </h1>
+                          ),
+                          h2: ({ node, children, ...props }: any) => (
+                            <h2 className="text-xl font-bold mb-2 mt-3" {...props}>
+                              {children}
+                            </h2>
+                          ),
+                          h3: ({ node, children, ...props }: any) => (
+                            <h3 className="text-lg font-bold mb-2 mt-2" {...props}>
+                              {children}
+                            </h3>
+                          ),
+                          blockquote: ({ node, children, ...props }: any) => (
+                            <blockquote className="border-l-4 border-gray-300 pl-4 italic my-2" {...props}>
+                              {children}
+                            </blockquote>
+                          ),
+                          table: ({ node, children, ...props }: any) => (
+                            <table className="border-collapse border border-gray-300 my-2" {...props}>
+                              {children}
+                            </table>
+                          ),
+                          th: ({ node, children, ...props }: any) => (
+                            <th className="border border-gray-300 px-4 py-2 bg-gray-100 font-bold" {...props}>
+                              {children}
+                            </th>
+                          ),
+                          td: ({ node, children, ...props }: any) => (
+                            <td className="border border-gray-300 px-4 py-2" {...props}>
+                              {children}
+                            </td>
+                          ),
+                        }}
+                      >
+                        {part.content}
+                      </ReactMarkdown>
+                      </div>
                     )
                   }
                   return null
@@ -127,7 +200,7 @@ export function Chat() {
         ))}
         {isLoading && (messages.length === 0 || messages[messages.length - 1]?.role === 'user') && (
           <div className="flex gap-3">
-            <div className="shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -183,7 +256,7 @@ export function Chat() {
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed enabled:hover:from-blue-700 enabled:hover:to-blue-800 enabled:hover:scale-105 transition-all duration-200 shadow-lg shadow-blue-500/30"
+                className="p-3 bg-linear-to-br from-blue-600 to-blue-700 text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed enabled:hover:from-blue-700 enabled:hover:to-blue-800 enabled:hover:scale-105 transition-all duration-200 shadow-lg shadow-blue-500/30"
                 title="送信 (Enter)"
               >
                 {isLoading ? (
