@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import 'highlight.js/styles/github.css'
+import { markdownComponents } from './markdown-components'
 
 export function Chat() {
   const [input, setInput] = useState('')
@@ -87,103 +88,10 @@ export function Chat() {
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           rehypePlugins={[rehypeHighlight]}
-                          components={{
-                          // カスタムスタイリング
-                          strong: ({ node, children, ...props }: any) => (
-                            <strong className="font-bold" {...props}>
-                              {children}
-                            </strong>
-                          ),
-                          em: ({ node, children, ...props }: any) => (
-                            <em className="italic" {...props}>
-                              {children}
-                            </em>
-                          ),
-                          code: ({ node, inline, className, children, ...props }: any) => {
-                            return inline ? (
-                              <code className="bg-gray-100 px-2 py-1 rounded text-sm" {...props}>
-                                {children}
-                              </code>
-                            ) : (
-                              <code className={className} {...props}>
-                                {children}
-                              </code>
-                            )
-                          },
-                          pre: ({ node, children, ...props }: any) => (
-                            <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto my-2" {...props}>
-                              {children}
-                            </pre>
-                          ),
-                          a: ({ node, children, ...props }: any) => (
-                            <a
-                              className="text-blue-600 hover:underline"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              {...props}
-                            >
-                              {children}
-                            </a>
-                          ),
-                          ul: ({ node, children, ...props }: any) => (
-                            <ul className="list-disc ml-4 my-2" {...props}>
-                              {children}
-                            </ul>
-                          ),
-                          ol: ({ node, children, ...props }: any) => (
-                            <ol className="list-decimal ml-4 my-2" {...props}>
-                              {children}
-                            </ol>
-                          ),
-                          li: ({ node, children, ...props }: any) => (
-                            <li className="ml-2" {...props}>
-                              {children}
-                            </li>
-                          ),
-                          p: ({ node, children, ...props }: any) => (
-                            <p className="mb-2 last:mb-0" {...props}>
-                              {children}
-                            </p>
-                          ),
-                          h1: ({ node, children, ...props }: any) => (
-                            <h1 className="text-2xl font-bold mb-2 mt-4" {...props}>
-                              {children}
-                            </h1>
-                          ),
-                          h2: ({ node, children, ...props }: any) => (
-                            <h2 className="text-xl font-bold mb-2 mt-3" {...props}>
-                              {children}
-                            </h2>
-                          ),
-                          h3: ({ node, children, ...props }: any) => (
-                            <h3 className="text-lg font-bold mb-2 mt-2" {...props}>
-                              {children}
-                            </h3>
-                          ),
-                          blockquote: ({ node, children, ...props }: any) => (
-                            <blockquote className="border-l-4 border-gray-300 pl-4 italic my-2" {...props}>
-                              {children}
-                            </blockquote>
-                          ),
-                          table: ({ node, children, ...props }: any) => (
-                            <table className="border-collapse border border-gray-300 my-2" {...props}>
-                              {children}
-                            </table>
-                          ),
-                          th: ({ node, children, ...props }: any) => (
-                            <th className="border border-gray-300 px-4 py-2 bg-gray-100 font-bold" {...props}>
-                              {children}
-                            </th>
-                          ),
-                          td: ({ node, children, ...props }: any) => (
-                            <td className="border border-gray-300 px-4 py-2" {...props}>
-                              {children}
-                            </td>
-                          ),
-                        }}
-                      >
-                        {part.content}
-                      </ReactMarkdown>
+                          components={markdownComponents}
+                        >
+                          {part.content}
+                        </ReactMarkdown>
                       </div>
                     )
                   }
@@ -206,10 +114,13 @@ export function Chat() {
               </svg>
             </div>
             <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 text-sm">考え中</span>
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
               </div>
             </div>
           </div>
